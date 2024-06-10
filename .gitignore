@@ -1,0 +1,9 @@
+node_modules
+package-lock.json
+dist
+build
+
+
+# npm 저장소 때문에 임시로 주석처리
+pnpm-lock.yaml 
+.npmrc
