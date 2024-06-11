@@ -207,20 +207,27 @@ monorepo 셋팅 프로젝트 입니다.
 <br/>
 
 # 모노레포 사례
-(1) 무신사
-- yarn berry & yarn workspace 사용
-- yarn의 PnP(Plug'nPlay) 사용
-  (Q) PnP는 무엇인가??
-- zero-Install 사용
-  (Q) zeroInstall은 무엇인가??
+- vite   
+  - https://github.com/vitejs/vite/blob/main/package.json
+- 무신사
+  - https://medium.com/musinsa-tech/journey-of-a-frontend-monorepo-8f5480b80661
+
+
+
+<br/>
+<br/>
+
+# 모노레포 구성 시 root에서 설치/셋팅 필요한 패키지/툴
+- prettier
+- eslint
+- typescript(???)
+
 
 
 <br/>
 <br/>
 
 # 참고 문서
-- (모노레포 이렇게 좋은데 왜 안써요? - 무신사 테크)
-https://medium.com/musinsa-tech/journey-of-a-frontend-monorepo-8f5480b80661
 - (Moving from multiple repositories to a lerna-js mono-repo)
 https://levelup.gitconnected.com/moving-from-multiple-repositories-to-a-lerna-js-mono-repo-faa97aeee35b
 - (monorepo.tools)

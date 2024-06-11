@@ -24,6 +24,37 @@ Lerna is the ultimate tool for publishing multiple packages to npm. Whether the 
 <br/>
 <br/>
 
+
+# 셋팅하면서 확인해야 할 내용
+[ ] root
+  [O] pnpm 초기화 및 설정 
+  [O] lerna 초기화 및 설정
+  [O] util 폴더에 공통 파일 생성
+  [ ] prettier, lint 설정
+[ ] 하위 워크스페이스
+  [O] projectA에 npm 초기화
+  [o] projectA에 react 및 webpack 셋팅
+[ ] root - 하위 워크스페이스 의존성 연결
+  [O] proejctA의 webpack.config.js에서 root 경로 resolve.alias 설정 후 정상적으로 import 되는지 확인하기
+  [O] projectA의 App.jsx에서 root의 util 파일 가져와 사용해보기
+  [ ] root에서 설치한 prettier, lint 패키지를 projectA에서 보도록 설정하기 (workspace: / link-workspace-packages)
+  [ ] 하위 패키지에서 root의 prettier, lint 설정 가져와 사용해보기
+[ ] devServer 실행
+  [O] projectA 내부에서 webpack-dev-server 실행
+[ ] build 실행
+  [O] projectA 내부에서 build 실행
+  [O] root에서 build 실행
+[ ] deploy
+  [ ] github actions 테스트해보기
+  [ ] 사내 환경의 CI/CD에 적용할 방법 고민해보기
+[ ] lerna 장점 / 특징 무엇인지 고민해보기
+[ ] nx, turborepo 와 비교해보기
+
+
+
+<br/>
+<br/>
+
 # pnpm으로 셋팅하기
 https://lerna.js.org/docs/recipes/using-pnpm-with-lerna
 
@@ -39,6 +70,8 @@ sh: pnpm: command not found
 
 (1) root 폴더의 node_modules 삭제하기
 
+<br/>
+
 (2) lerna.json 추가하여 아래 코드 입력하기
 ```
 {
@@ -46,6 +79,8 @@ sh: pnpm: command not found
   "version": "1.0.0"
 }
 ```
+
+<br/>
 
 (3) root 폴더에 pnpm-workspace.yaml 추가 후 아래 구문 추가하기
 - yarn/npm의 package.json에 "workspaces" 속성이 있으면 제거하기 (lerna는 pnpm-workspace.yaml을 봄, yarn/npm 일 땐 package.json에 workspaces 속성 추가해야 함)
@@ -57,9 +92,11 @@ packages:
   - "packages/*"
 ```
 
+<br/>
+
 (4) `pnpm install` 
 
-
+<br/>
 
 (5) lerna init
 - 빈 프로젝트에서 시작할 때: `npx lerna@latest init --dryRun` (--dryRun: lerna init 이 파일 시스템에 적용할 변경 사항을 미리 볼 수 있음)
@@ -68,6 +105,7 @@ packages:
 
 🔥 Lerna 는 자동적으로 버전과 태그를 생성해주며, 패키지 레지스트리에 패키지 게시함
 
+<br/>
 
 (6) Run
 `npx lerna run build`
@@ -81,3 +119,15 @@ packages:
 - scope에 패키지명 추가하여 해당 패키지만 빌드됨
 
 <br/>
+
+(7) root에서 prettier, lint 셋팅하기
+- root에서 `npx pnpm install -D prettier eslint` 설치하기
+- 이 때, 아래와 같은 경고 메시지 발생
+```
+ERR_PNPM_ADDING_TO_ROOT  Running this command will add the dependency to the workspace root, which might not be what you want - if you really meant it, make it explicit by running this command again with the -w flag (or --workspace-root). If you don't want to see this warning anymore, you may set the ignore-workspace-root-check setting to true.
+```
+→ pnpm에서 해당 명령이 root에서 실행되어 전체 워크스페이스에 의도하지 않는 영향을 미칠 수 있음을 알려줌
+→ root에서 prettier, lint 설치하는 등 root단에서 셋팅할 수 있으므로 해당 경고가 발생하는 것은 번거로움.. 이를 발생시키지 않으려면?   
+  - `-w`, `--workspace-root` 플래그를 추가하여 경고 무시 가능
+  (ex) `npx pnpm install -D -w prettier eslint`
+  - `.npmrc`에서 `ignore-workspace-root-check: true` 로 변경
