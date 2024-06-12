@@ -1,6 +1,7 @@
 node_modules
 dist
 build
+.vscode
 
 
 # npm 저장소 때문에 임시로 주석처리

@@ -1,2 +1,3 @@
+# 모노레포 패키지들은 위치 명시해주기
 packages:
   - "packages/*"

@@ -1,0 +1,30 @@
+{
+  "name": "projectb",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "smileJMJ <mjj0324@gmail.com>",
+  "homepage": "https://github.com/smileJMJ/monorepo-setting#readme",
+  "license": "ISC",
+  "main": "lib/projectB.ts",
+  "type": "module",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smileJMJ/monorepo-setting.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/projectB.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/smileJMJ/monorepo-setting/issues"
+  }
+}
