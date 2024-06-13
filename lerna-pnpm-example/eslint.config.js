@@ -29,6 +29,8 @@
 //   },
 // });
 
+// TODO. typescirpt-eslint 다시 설정해야함!!!
+
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 

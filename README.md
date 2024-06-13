@@ -235,7 +235,21 @@ monorepo 셋팅 프로젝트 입니다.
 
 - prettier
 - eslint
-- typescript(???)
+  - (eslint + typescript) 기존에는 eslint의 parser에 `@typescript-eslint/parser` 추가하여 타입스크립트 구문을 파싱하도록 하였으나, typescript 전용 eslint가 생겼음. (타입도 린팅해줌)
+    (typescript-eslint) https://typescript-eslint.io/getting-started/
+
+📒 typescript 사용 시에는 typescript-eslint로 셋팅하는게 좋을듯
+
+<br/>
+
+🔥 eslint와 prettier를 같이 쓸 때, eslint 설정 중 prettier 와 충돌하는 부분을 비활성화하는 `eslint-config-prettier` 를 설치하고, eslint.config.js 를 수정한다.
+https://poiemaweb.com/eslint
+
+```
+extends: [..., "prettier"]
+```
+
+- typescript
 
 <br/>
 <br/>

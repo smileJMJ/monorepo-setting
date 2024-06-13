@@ -1,0 +1,28 @@
+{
+  "version": "6.0",
+  "nxVersion": "19.2.3",
+  "deps": {
+    "nx": "19.2.3"
+  },
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {
+      "add-nx-self": [
+        {
+          "file": "nx.json",
+          "hash": "9586600205553789878"
+        },
+        {
+          "file": "package-lock.json",
+          "hash": "10852392131090672221"
+        },
+        {
+          "file": "package.json",
+          "hash": "2050273118273039353"
+        }
+      ]
+    },
+    "nonProjectFiles": []
+  }
+}

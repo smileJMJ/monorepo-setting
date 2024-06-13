@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "cache": true
+    }
+  },
+  "defaultBase": "main",
+  "nxCloudAccessToken": "NzE2OTMzNzQtYjg3ZC00Yzc1LWFhZmQtYmI1MDI5YWIwYjkwfHJlYWQtd3JpdGU="
+}
