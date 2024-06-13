@@ -14,3 +14,5 @@ https://turbo.build/repo/docs
 
 - starter로 설치 가능 `npx create-turbo@latest`
 - 또는 turbo 설치 후 셋팅 가능 `npm install turbo --save-dev`
+- 예제 프로젝트 설치 가능 `npx create-turbo@latest --example [example-name]`
+  https://turbo.build/repo/docs/getting-started/installation#start-with-an-example
