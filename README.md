@@ -74,6 +74,7 @@ monorepo 셋팅 프로젝트 입니다.
   (Q) repo root에서 설치한 패키지와, 각 프로젝트 내에서 설치한 패키지가 동일할 때??
 - 각 프로젝트 별 공통 코드 분리, 코드 컨벤션 정의 필요! (모노레포 사용 목적 1)
   (Q) 어디까지 공통화 할 것이며, 프로젝트 별 자유도를 줄 것인가??
+  - 배포 전략은 어떻게 할 것인가??
 
 <br/>
 <br/>
@@ -267,9 +268,239 @@ extends: [..., "prettier"]
 <br/>
 <br/>
 
+# 배포 방법
+
+🌈 모노레포는 패키지가 독립적으로 빌드 및 배포될 수 있도록 설정해야 함
+→ 각 패키지별 package.json에 빌드 스크립트 명시하거나, turborepo등 모노레포 툴 사용 시 root의 package.json에 각 패키지별 빌드 스크립트 명시 필요
+🌈 모노레포 프로젝트 내의 각 패키지는 서로 다른 버전을 가질 수 있음
+→ 버전 별 의존성 관리 필요
+🌈 배포 시 CI / CD 자동화 가능
+
+<br/>
+<br/>
+
+🌈 배포 방법
+(1) CI/CD 툴 사용
+
+- GitHub Actions: GitHub와 함께 사용하는 무료 CI/CD 서비스
+- Jenkins: 오픈 소스 CI/CD 서버
+- CircleCI: 클라우드 기반 CI/CD 플랫폼
+- Azure DevOps: 마이크로소프트에서 제공하는 CI/CD 서비스
+
+<br/>
+
+(2) 플랫폼 서비스 사용
+
+- Vercel: 프론트엔드 모노레포 배포에 특화된 플랫폼
+- Netlify: 정적 웹사이트 및 웹어플리케이션 배포 플랫폼
+- AWS Amplify: AWS 기반 웹어플리케이션 배포 서비스
+
+<br/>
+
+(3) 스크립트 사용
+
+- 스트립트 작성 후 실행
+
+(4) 모노레포 툴 사용
+
+- Lerna, Nx, Turborepo 등
+
+<br/>
+<br/>
+
+# 배포 단계
+
+- 빌드 단계: 배포 전에 코드 컴파일 및 필요한 자산 생성
+- 테스트 단계: 빌드된 코드의 기능 및 성능 테스트
+- 배포 단계: 빌드 및 테스트를 통과한 코드를 배포 환경에 배포
+
+<br/>
+<br/>
+
+# 배포 전략
+
+- TBD(Trunk Based Development)
+-
+
+<br/>
+<br/>
+
+# 배포/버전관리 관련 궁금증 AI한테 물어보기
+
+```
+그럼 turborepo, npm을 이용하고 jenkins를 이용해 CI/CD 설정하려고 해. root에 utils 폴더는 공통 유틸 파일이 있고, eslint, prettier, typescript 공통 셋팅할 거야. 패키지는 projectA, projectB 가 있고 projectA는 react, projectB는 vue로 설정되어 있어.
+```
+
+(1) root 버전이 0.0.0에서 0.1.0으로 변경되었을 때, projectA와 projectB도 버전이 0.1.0으로 변경되어야 하는가?
+
+```
+// [ chatGPT ]
+Root 버전과 각 패키지의 버전은 독립적으로 관리됩니다. 따라서 root 버전을 0.0.0에서 0.1.0으로 변경해도, projectA와 projectB의 버전은 변경되지 않습니다. 개별 패키지의 버전은 각 패키지의 package.json 파일에서 관리되며, 필요에 따라 독립적으로 변경할 수 있습니다.
+
+// [ Gemini ]
+1. root 버전 변경:
+package.json 파일에 version 필드를 0.1.0으로 변경합니다.
+npm version 0.1.0 명령어를 실행하여 버전 업데이트를 완료합니다.
+
+2. 프로젝트 버전 동기화:
+lerna publish 명령어를 실행하면 projectA와 projectB의 버전도 자동으로 0.1.0으로 업데이트됩니다.
+각 프로젝트의 package.json 파일에 version 필드를 직접 0.1.0으로 변경해도 됩니다.
+```
+
+<br/>
+
+(2) root에 설치된 TypeScript 버전을 변경하면, projectA와 projectB는 새로 빌드하고 npm install을 통해 TypeScript 버전이 변경되는가?
+
+🔥 해당 내용 테스트 통해 확인 필요
+
+```
+// [ chatGPT ]
+Root에서 TypeScript 버전을 변경하면, 이는 각 패키지에서 사용되는 TypeScript 버전에 영향을 미칠 수 있습니다. 특히, 모노레포 설정에서 각 패키지가 root의 node_modules를 참조하는 경우, 다음과 같은 과정을 통해 변경된 TypeScript 버전이 반영됩니다:
+
+Root에서 TypeScript 버전 변경:
+npm install typescript@latest
+
+각 패키지에서 설치된 의존성을 업데이트:
+npm install
+
+각 패키지에서 TypeScript 관련 빌드 스크립트를 실행하여 새로운 버전이 반영되었는지 확인:
+npm run build
+
+
+// [ Gemini ]
+- Typescript 버전 변경:
+root 디렉토리에서 npm install --save-dev typescript@<새 버전> 명령어를 실행하여 typescript 버전을 변경합니다.
+- 프로젝트 영향:
+변경된 typescript 버전은 자동으로 projectA와 projectB에 적용되지 않습니다.
+각 프로젝트 디렉토리에서 npm install --save-dev typescript@<새 버전> 명령어를 별도로 실행해야 합니다.
+```
+
+<br/>
+
+(3) 모노레포 배포 시 Turborepo의 배포 스크립트를 이용하면 root와 모든 프로젝트가 빌드 및 배포되는가? projectA만 빌드하고 싶을 때는 어떻게 해야 하는가?
+
+```
+// [ chatGPT ]
+Turborepo는 작업의 종속성을 기반으로 빌드를 최적화합니다. 특정 패키지만 빌드하거나 배포하려면 다음과 같이 설정할 수 있습니다
+1. 모든 패키지를 빌드하는 스크립트:
+// root package.json
+{
+  "scripts": {
+    "build": "turbo run build"
+  }
+}
+
+2. 특정 패키지만 빌드하는 스크립트:
+// root package.json
+{
+  "scripts": {
+    "build:projectA": "turbo run build --filter=projectA"
+  }
+}
+Jenkins에서 특정 패키지만 빌드하고 배포하려면, 해당 스크립트를 Jenkins 파이프라인에 추가하면 됩니다.
+
+
+// [ Gemini ]
+모든 프로젝트 배포:
+npx turbo run build 명령어를 실행하면 root, projectA, projectB 모든 프로젝트를 빌드하고 배포합니다.
+
+특정 프로젝트 배포:
+npx turbo run build --project projectA 명령어를 실행하면 projectA만 빌드하고 배포합니다.
+여러 프로젝트를 선택적으로 배포하려면 --project 옵션을 반복적으로 사용합니다. (예: npx turbo run build --project projectA --project projectB)
+
+
+```
+
+<br/>
+
+(4) root와 projectB는 0.0.0 버전이고, projectA만 1.0.0 버전으로 관리할 수 있는가?
+
+```
+// [ chatGPT ]
+각 패키지는 독립적으로 버전을 관리할 수 있습니다. 다음과 같이 설정할 수 있습니다:
+1. Root의 버전:
+// root package.json
+{
+  "version": "0.0.0",
+  "private": true
+}
+
+2. projectA의 버전:
+// packages/projectA/package.json
+{
+  "version": "1.0.0",
+  "name": "projectA",
+  ...
+}
+
+3. projectB의 버전:
+// packages/projectB/package.json
+{
+  "version": "0.0.0",
+  "name": "projectB",
+  ...
+}
+
+전체적인 CI/CD 설정 예시
+Jenkins를 이용한 CI/CD 설정 예시를 간단히 소개합니다:
+
+1. Jenkinsfile
+pipeline {
+    agent any
+
+    stages {
+        stage('Install dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('Build all projects') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+        stage('Build projectA only') {
+            steps {
+                sh 'npm run build:projectA'
+            }
+        }
+        stage('Publish projectA') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'main') {
+                        sh 'npm publish packages/projectA'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// [ Gemini ]
+1. 버전 관리:
+각 프로젝트의 package.json 파일에 독립적인 version 필드를 사용하여 버전을 관리할 수 있습니다.
+root 버전은 0.0.0, projectA 버전은 1.0.0으로 설정하고, projectB 버전은 0.0.0으로 유지할 수 있습니다.
+
+2. 주의 사항:
+root 프로젝트의 변경 사항은 projectA와 projectB에 자동으로 영향을 미치지 않습니다.
+각 프로젝트에서 필요한 변경 사항을 별도로 적용해야 합니다.
+의존성 관계에 유의하여 버전 충돌을 방지해야 합니다.
+
+3. CI/CD 설정 추가 팁:
+Jenkins에서 npm install, lerna publish, turbo run build 명령어를 실행하는 스크립트를 정의하여 자동화된 배포를 구현할 수 있습니다.
+테스트 단계를 추가하여 배포 전에 코드 검증을 수행하는 것이 좋습니다.
+배포 환경에 맞는 설정을 추가로 조정해야 할 수도 있습니다.
+```
+
+<br/>
+<br/>
+
 # 참고 문서
 
 - (Moving from multiple repositories to a lerna-js mono-repo)
   https://levelup.gitconnected.com/moving-from-multiple-repositories-to-a-lerna-js-mono-repo-faa97aeee35b
 - (monorepo.tools)
   https://monorepo.tools/
+- (모노레포와 TBD로 효율적인 배포 파이프라인 구축하기)
+  https://velog.io/@chltmdxo3/%EB%AA%A8%EB%85%B8%EB%A0%88%ED%8F%AC%EC%99%80-TBD%EB%A1%9C-%ED%9A%A8%EC%9C%A8%EC%A0%81%EC%9D%B8-%EB%B0%B0%ED%8F%AC-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-%EA%B5%AC%EC%B6%95%ED%95%98%EA%B8%B0
