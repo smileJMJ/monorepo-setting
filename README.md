@@ -230,6 +230,117 @@ monorepo 셋팅 프로젝트 입니다.
 
 ### 번들러
 
+#### esbuild
+
+(1) esbuild 설치
+(2) esbuild.config.js 파일 생성 및 셋팅
+
+- esbuild는 npm scripts 구문에서 플래그를 이용해 옵션 설정이 가능하며, js 파일로 설정 파일을 생성할 경우 node를 이용해 실행해야 한다.
+
+```
+// package.json
+{
+  "scripts": {
+    "dev": "node esbuild.config.js mode=development",
+    "build": "node esbuild.config.js mode=production",
+  }
+}
+```
+
+<br/>
+
+```
+// esbuild.config.js
+import { context, build } from 'esbuild';
+
+try {
+  const args = process.argv;
+  const modeValue = args?.filter((v) => v?.includes('mode='))[0];
+  const mode = modeValue?.split('mode=')?.[1];
+
+  if (mode === 'development') {
+    // devserver/index.html로 devserver 실행합니다.
+    const { watch, serve } = await context({
+      entryPoints: ['./src/js/index.tsx'],
+      bundle: true,
+      outdir: 'devserver',
+      sourcemap: true,
+      jsx: 'automatic',
+    });
+
+    await serve({
+      servedir: 'devserver',
+      port: 2024,
+      host: 'local.plaync.com',
+    });
+
+    watch();
+  } else {
+    await build({
+      entryPoints: ['./src/js/index.tsx'],
+      bundle: true,
+      outdir: './dist',
+      jsx: 'automatic',
+    });
+  }
+} catch (error) {
+  console.error(`== error: ${error} ==`);
+  process.exit(1);
+}
+
+```
+
+<br/>
+
+(3) devserver 구현하기
+
+- 개발 모드일 때, esbuild.config.js에서 esbuild의 serve()를 실행한다.
+- 단, index.html이 포함된 폴더에 번들한 파일이 저장되어 실행될 수 있도록, outdir 및 servedir에 index.html이 포함된 폴더명을 작성한다. (ex) www
+- livereload를 구현하기 위해선 1. serve() 뒤에 watch()를 실행함 2. index.html의 script에 아래의 코드를 삽입한다.
+
+```
+<script>
+  // EventSource는 node에서 실행 불가능하며, 브라우저에서만 실행 가능하여 html에 적용함
+  if (location.hostname === 'local.plaync.com') {
+    // live reload
+    new EventSource('/esbuild').addEventListener('change', () => location.reload());
+  }
+</script>
+```
+
+- hotreloading은 css 변화 감지만 가능하고, js는 아직 불가능하다고 함.
+  html에서 livereloading 코드 추가한 곳에 아래와 같이 변경한다.
+
+```
+<script>
+// EventSource는 node에서 실행 불가능하며, 브라우저에서만 실행 가능하여 html에 적용함
+if (location.hostname === 'local.plaync.com') {
+  // live reload + hot reloading for css
+  new EventSource('/esbuild').addEventListener('change', (e) => {
+    const { added, removed, updated } = JSON.parse(e.data);
+
+    // hot reloading for css
+    if (!added.length && !removed.length && updated.length === 1) {
+      for (const link of document.getElementsByTagName('link')) {
+        const url = new URL(link.href);
+
+        if (url.host === location.host && url.pathname === updated[0]) {
+          const next = link.cloneNode();
+          next.href = update[0] + '?' + Math.random().toString(36).slice(2);
+          next.onload = () => link.remove();
+          link.parentNode.insertBefore(next, link.nextSibling);
+          return;
+        }
+      }
+    }
+
+    // live reload
+    location.reload();
+  });
+}
+</script>
+```
+
 <br/>
 <br/>
 
