@@ -78,3 +78,107 @@ const { watch, serve, rebuild } = await esbuild.context({
 <br/>
 
 ## loader
+
+<br/>
+<br/>
+
+## Content Types
+
+### CSS
+
+- css loader는 파일을 CSS 구문으로 로드함
+- loader: css (일반 스타일 파일 로더), global-css / local-css (css module 로더)
+- .css 파일은 css loader가 기본적으로 활성화되며, .module.css 파일은 local-css 로더가 활성화 됨
+- esbuild에서 css 파일을 entry에 직접 연결하여 번들할 수 있음
+- js에서 css import 할 경우, css 진입점에서 css 파일들을 가져와 번들하며 js 옆에 해당 js 명으로 번들됨. (ex) app.js에서 호출한 경우 → app.css
+
+#### Sass 사용 시 셋팅해야 할 것
+
+```
+// 폴더 구조
+- src
+  - js
+    - component
+      - test
+        - Test.tsx
+        - Test.module.scss
+  - sass
+    - utils
+      - mixin
+        - _hidden.scss
+        - ...
+      - _reset.scss
+      - _variable.scss
+      - _mixin.scss
+    - index.scss
+
+// sass 셋팅 목표
+(1) module.scss, src/sass/*.scss → css로 번들링 및 변환
+(2) module.scss에서 variable.scss, mixin.scss 코드 사용 가능함
+```
+
+<br/>
+<br/>
+
+##### (1) module.scss, src/sass/\*.scss → css로 번들링 및 변환
+
+```
+// esbuild.config.js
+
+{
+  ...
+  plugins: [
+    // sass module - .scss보다 먼저 선언되어야 함
+    sassPlugin({
+      filter: /\.module\.scss$/,
+      type: 'local-css',
+    }),
+
+    // sass
+    sassPlugin({
+      filter: /\.scss$/,
+      cssImports: true,
+      type: 'css',
+    }),
+  ],
+}
+```
+
+<br/>
+<br/>
+
+##### (2) module.scss에서 variable.scss, mixin.scss 코드 사용 가능함
+
+```
+// esbuild.config.js
+
+{
+  ...
+  plugins: [
+    // sass module - .scss보다 먼저 선언되어야 함
+    sassPlugin({
+      filter: /\.module\.scss$/,
+      type: 'local-css',
+      precompile(source, pathname, isRoot) {
+        /*
+          - module.css에서도 mixin, variable 사용할 수 있도록
+          - precompile에 추가하지 않을 경우 각 module.css에서 @use 구문 추가 후 사용해야 함
+        */
+        return isRoot
+          ? `@use '../../../sass/utils/_variable.scss' as *;\n@use '../../../sass/utils/_mixin.scss' as *;\n${source}`
+          : source;
+      },
+    }),
+
+    // sass
+    sassPlugin({
+      filter: /\.scss$/,
+      cssImports: true,
+      type: 'css',
+    }),
+  ],
+}
+```
+
+<br/>
+<br/>
