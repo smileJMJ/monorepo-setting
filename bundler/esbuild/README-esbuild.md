@@ -88,11 +88,18 @@ const { watch, serve, rebuild } = await esbuild.context({
 
 - css loader는 파일을 CSS 구문으로 로드함
 - loader: css (일반 스타일 파일 로더), global-css / local-css (css module 로더)
-- .css 파일은 css loader가 기본적으로 활성화되며, .module.css 파일은 local-css 로더가 활성화 됨
+  - local-css
+    - css를 로컬 범위로 스코핑하여 다른 모듈과 클래스 이름 충돌을 방지하기 위해 사용함
+    - 모듈명을 기반으로 클래스, 아이디를 고유한 값으로 변환함  
+      (ex) styles.module.scss일 때, .button → .styles_button_3aGpk 로 변환함
+  - global-css
+    - css를 전역 범위로 스코핑하여 다른 모듈과 충돌할 가능성이 있음
+    - 클래스와 아이디는 원래 이름 그대로 유지됨
+- .css 파일은 css loader가 기본적으로 활성화되며, .module.css 파일은 local-css 로더가 기본적으로 활성화 됨 (esbuild에서 변환한 local css 클래스명을 가져오기 위해 CSS 모듈 코드를 JS 파일로 가져와서 사용해야 함)
 - esbuild에서 css 파일을 entry에 직접 연결하여 번들할 수 있음
 - js에서 css import 할 경우, css 진입점에서 css 파일들을 가져와 번들하며 js 옆에 해당 js 명으로 번들됨. (ex) app.js에서 호출한 경우 → app.css
 
-#### Sass 사용 시 셋팅해야 할 것
+#### Sass 셋팅
 
 ```
 // 폴더 구조
@@ -123,6 +130,10 @@ const { watch, serve, rebuild } = await esbuild.context({
 ##### (1) module.scss, src/sass/\*.scss → css로 번들링 및 변환
 
 ```
+// esbuild-sass-plugin 설치
+https://www.npmjs.com/package/esbuild-sass-pluginload
+
+
 // esbuild.config.js
 
 {
@@ -143,6 +154,13 @@ const { watch, serve, rebuild } = await esbuild.context({
   ],
 }
 ```
+
+- type: 'local-css'
+  - esbuild의 내장 CSS 모듈 지원(local-css loader)을 사용함
+
+[ 참고 ]
+(esbuild-sass-plugin) https://www.npmjs.com/package/esbuild-sass-pluginload
+(esbuild ContentType - CSS) https://esbuild.github.io/content-types/#css
 
 <br/>
 <br/>
@@ -179,6 +197,58 @@ const { watch, serve, rebuild } = await esbuild.context({
   ],
 }
 ```
+
+- precompile
+
+  - compile 전에 진행해야 하는 작업들을 정의함
+  - 다른 스타일 파일로 정의한 variable, mixin을 css 모듈에서 사용하기 위해선 각 css 모듈 파일에서 @use 구문으로 해당 파일들을 호출해야하는데, 매번 모듈 파일에서 추가하기 번거로우므로 scss -> css 컴파일 전에 필요한 전역 scss 파일이 추가될 수 있도록 정의함  
+    (단, 모듈에서 variable, mixin 코드를 사용했을 때만 해당 코드를 가져오며, 사용하지 않으면 treeshaking됨)
+  - @import 중첩을 피하기 위해 isRoot일 때만 추가하도록 정의함
+  - https://www.npmjs.com/package/esbuild-sass-plugin#--globals-and-other-shims-like-sass-loaders-additionaldata
+
+  ```
+  // Test2.module.scss
+  .test {
+    background: yellow;
+    color: $primary; // variable 사용
+    @include hidden; // mixin 사용
+  }
+
+
+  // index.css (번들된 css)
+  /* src/js/components/test2/test2.module.scss */
+  .test2_module_test {
+    background: yellow;
+    // variable 사용
+    color: #6490e7;
+
+    // mixin 사용
+    display: block;
+    position: absolute;
+    clip: rect(0 0 0 0);
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+  }
+
+
+  // index.css.map
+  {
+    "version": 3,
+    "sources": [
+      "../../src/js/components/test2/test2.module.scss",
+      "../../src/sass/utils/_variable.scss",
+      "../../src/sass/utils/mixin/_hidden.scss",
+      "../../src/sass/style.scss",
+      "../../src/sass/utils/_reset.scss"
+    ],
+    "sourcesContent": [
+      "@use '../../../sass/utils/_variable.scss' as *;\n@use '../../../sass/utils/_mixin.scss' as *;\n.test {\n  background: yellow;\n  color: $primary;\n  @include hidden;\n}\n",
+    ]
+    ...
+  }
+  ```
 
 <br/>
 <br/>
