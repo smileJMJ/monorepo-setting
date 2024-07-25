@@ -318,3 +318,10 @@ https://github.com/nextui-org/nextui/blob/canary/package.json
   "build:docs": "turbo build --filter=@nextui-org/docs",
 }
 ```
+
+📒 .turbo 폴더는 .gitignore에도 포함되어 있음 (https://github.com/vercel/turbo/blob/main/.gitignore)
+
+- .turbo 폴더에 cache 파일이 있어서 local cache 때문에 git에서 관리해야할지 고민했으나, CI 셋팅 시 git에서 관리해도 docker image가 바뀌는 이슈에는 방법이 없었음.
+
+<br/>
+<br/>
