@@ -43,6 +43,8 @@ const SASS_DEFAULT_PLUGIN = [
     filter: /\.scss$/,
     cssImports: true,
     type: 'css',
+    // 단, ts 셋팅한 경우 tsconfig.compilerOptions.paths에도 정의해줘야 함
+    importMapper: (path) => path.replace(/^@img\//, './assets/img/').replace(/^@svg\//, './assets/svg/'),
   }),
 ];
 

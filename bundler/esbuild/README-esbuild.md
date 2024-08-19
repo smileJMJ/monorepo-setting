@@ -361,3 +361,42 @@ body {
 
 <br/>
 <br/>
+
+##### assets import 시 경로 가공 - (1) alias path (2) relative path
+
+###### (1) alias path
+
+```
+// tsconfig.json (typescript 셋팅했을 경우)
+// typescript로 셋팅하였으나, tsconfig.compilerOptions.paths에 해당 alias path값이 없으면 esbuild에서 에러 발생함
+{
+  ...
+  "compilerOptions": {
+    "paths": {
+      ...
+      "@img/*": ["assets/img/*"],
+      "@svg/*": ["assets/svg/*"],
+    }
+  }
+}
+```
+
+<br/>
+
+```
+// esbuild.config.js
+// sass
+  sassPlugin({
+    filter: /\.scss$/,
+    cssImports: true,
+    type: 'css',
+    importMapper: (path) => path.replace(/^@img\//, './assets/img/').replace(/^@svg\//, './assets/svg/'),
+  }),
+```
+
+<br/>
+
+※ tsconfig.json에 paths 추가하지 않았을 때 발생하는 오류
+![alt text](./readme-img/notsconfig.png)
+<br/>
+<br/>
