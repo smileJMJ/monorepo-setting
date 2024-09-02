@@ -398,5 +398,25 @@ body {
 
 ※ tsconfig.json에 paths 추가하지 않았을 때 발생하는 오류
 ![alt text](./readme-img/notsconfig.png)
+
 <br/>
 <br/>
+
+###### (2) relative path
+
+https://www.npmjs.com/package/esbuild-sass-plugin#precompile
+
+```
+// esbuild.config.js
+precompile(source, pathname) {
+  const basedir = path.dirname(pathname)
+  return source.replace(/(url\(['"]?)(\.\.?\/)([^'")]+['"]?\))/g, `$1${basedir}/$2$3`);
+}
+
+(예제) /sass/2depth/style.scss 에서 background: url('../../assets/img/test.jpg');
+
+// source: scss 파일 내 소스코드
+// pathname: scss 파일 경로 (ex) /Users/workspace/monorepo-settings/apps/projectA/src/sass/2depth/style.scss
+// basedir: pathname의 폴더 경로
+// 최종 결과값: /Users/workspace/monorepo-settings/apps/projectA/src/sass/2depth/../../assets/img/test.jpg
+```
