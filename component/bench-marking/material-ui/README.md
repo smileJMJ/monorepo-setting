@@ -45,9 +45,9 @@
 <br/>
 <br/>
 
-## mui-material
+## ./packages/mui-material
 
-### package.json
+### ./packages/mui-material/package.json
 
 ```
 // npm publish 가능
@@ -82,139 +82,19 @@ https://github.com/mui/material-ui/blob/master/scripts/build.mjs
 https://github.com/mui/material-ui/blob/master/scripts/buildTypes.mjs
 
 <br/>
+<br/>
 
-#### build.mjs
+### 빌드 후 생성되는 ./packages/mui-material/build/package.json 과 비교
 
-```
-import childProcess from 'child_process'; // node - 하위 프로세스 생성
-import glob from 'fast-glob';
-import path from 'path';
-import { promisify } from 'util';
-import yargs from 'yargs';
-import { getVersionEnvVariables, getWorkspaceRoot } from './utils.mjs';
+| 항목(package.[key]) | `./package.json` | `./build/package.json` |
+| ------------------- | ---------------- | ---------------------- |
+| main                | `./src/index.ts` | `./node/index.js`      |
+| scripts             | 있음             | 없음                   |
+| devDependencies     | 있음             | 없음                   |
+| module              | 없음             | `./index.js`           |
+| types               | 없음             | `./index.d.ts`         |
 
-const exec = promisify(childProcess.exec);
-
-const validBundles = [
-  // modern build with a rolling target using ES6 modules
-  'modern',
-  // build for node using commonJS modules
-  'node',
-  // build with a hardcoded target using ES6 modules
-  'stable',
-];
-
-async function run(argv) {
-  const { bundle, largeFiles, outDir: relativeOutDir, verbose } = argv;
-
-  if (validBundles.indexOf(bundle) === -1) {
-    throw new TypeError(
-      `Unrecognized bundle '${bundle}'. Did you mean one of "${validBundles.join('", "')}"?`,
-    );
-  }
-
-  const env = {
-    NODE_ENV: 'production',
-    BABEL_ENV: bundle,
-    MUI_BUILD_VERBOSE: verbose,
-    ...(await getVersionEnvVariables()),
-  };
-
-  const babelConfigPath = path.resolve(getWorkspaceRoot(), 'babel.config.js');
-  const srcDir = path.resolve('./src');
-  const extensions = ['.js', '.ts', '.tsx'];
-  const ignore = [
-    '**/*.test.js',
-    '**/*.test.ts',
-    '**/*.test.tsx',
-    '**/*.spec.ts',
-    '**/*.spec.tsx',
-    '**/*.d.ts',
-  ];
-
-  const topLevelNonIndexFiles = glob
-    .sync(`*{${extensions.join(',')}}`, { cwd: srcDir, ignore })
-    .filter((file) => {
-      return path.basename(file, path.extname(file)) !== 'index';
-    });
-  const topLevelPathImportsCanBePackages = topLevelNonIndexFiles.length === 0;
-
-  const outDir = path.resolve(
-    relativeOutDir,
-    // We generally support top level path imports e.g.
-    // 1. `import ArrowDownIcon from '@mui/icons-material/ArrowDown'`.
-    // 2. `import Typography from '@mui/material/Typography'`.
-    // The first case resolves to a file while the second case resolves to a package first i.e. a package.json
-    // This means that only in the second case the bundler can decide whether it uses ES modules or CommonJS modules.
-    // Different extensions are not viable yet since they require additional bundler config for users and additional transpilation steps in our repo.
-    //
-    // TODO v6: Switch to `exports` field.
-    {
-      node: topLevelPathImportsCanBePackages ? './node' : './',
-      modern: './modern',
-      stable: topLevelPathImportsCanBePackages ? './' : './esm',
-    }[bundle],
-  );
-
-  const babelArgs = [
-    '--config-file',
-    babelConfigPath,
-    '--extensions',
-    `"${extensions.join(',')}"`,
-    srcDir,
-    '--out-dir',
-    outDir,
-    '--ignore',
-    // Need to put these patterns in quotes otherwise they might be evaluated by the used terminal.
-    `"${ignore.join('","')}"`,
-  ];
-  if (largeFiles) {
-    babelArgs.push('--compact false');
-  }
-
-  const command = ['pnpm babel', ...babelArgs].join(' ');
-
-  if (verbose) {
-    // eslint-disable-next-line no-console
-    console.log(`running '${command}' with ${JSON.stringify(env)}`);
-  }
-
-  const { stderr, stdout } = await exec(command, { env: { ...process.env, ...env } });
-  if (stderr) {
-    throw new Error(`'${command}' failed with \n${stderr}`);
-  }
-
-  if (verbose) {
-    // eslint-disable-next-line no-console
-    console.log(stdout);
-  }
-}
-
-yargs(process.argv.slice(2))
-  .command({
-    command: '$0 <bundle>',
-    description: 'build package',
-    builder: (command) => {
-      return command
-        .positional('bundle', {
-          description: `Valid bundles: "${validBundles.join('" | "')}"`,
-          type: 'string',
-        })
-        .option('largeFiles', {
-          type: 'boolean',
-          default: false,
-          describe: 'Set to `true` if you know you are transpiling large files.',
-        })
-        .option('out-dir', { default: './build', type: 'string' })
-        .option('verbose', { type: 'boolean' });
-    },
-    handler: run,
-  })
-  .help()
-  .strict(true)
-  .version(false)
-  .parse();
-```
+🔥 module, types 을 `exports`로 사용할 수 있음
 
 <br/>
 <br/>
@@ -225,6 +105,101 @@ yargs(process.argv.slice(2))
 <br/>
 
 ### src
+
+#### export
+
+<br/>
+<br/>
+
+#### build
+
+```
+🌈 package.json - build script
+
+"build": "pnpm build:modern && pnpm build:node && pnpm build:stable && pnpm build:types && pnpm build:copy-files",
+```
+
+<br/>
+
+```
+🌈 npx pnpm run build --scope=@mui/material 실행 시
+
+> @mui/material:build
+
+
+> @mui/material@6.0.2 prebuild {저장 경로}/material-ui/packages/mui-material
+> rimraf build tsconfig.build.tsbuildinfo
+
+
+> @mui/material@6.0.2 build {저장 경로}/material-ui/packages/mui-material
+> pnpm build:modern && pnpm build:node && pnpm build:stable && pnpm build:types && pnpm build:copy-files
+
+
+> @mui/material@6.0.2 build:modern {저장 경로}/material-ui/packages/mui-material
+> node ../../scripts/build.mjs modern
+
+
+> @mui/material@6.0.2 build:node {저장 경로}/material-ui/packages/mui-material
+> node ../../scripts/build.mjs node
+
+
+> @mui/material@6.0.2 build:stable {저장 경로}/material-ui/packages/mui-material
+> node ../../scripts/build.mjs stable
+
+
+> @mui/material@6.0.2 build:types {저장 경로}/material-ui/packages/mui-material
+> node ../../scripts/buildTypes.mjs
+
+OK '{저장 경로}/material-ui/packages/mui-material/build/AccordionActions/accordionActionsClasses.d.ts'
+OK '{저장 경로}/material-ui/packages/mui-material/build/AccordionDetails/accordionDetailsClasses.d.ts'
+OK '{저장 경로}/material-ui/packages/mui-material/build/Accordion/accordionClasses.d.ts'
+....
+
+Fixed: 0
+Failed: 0
+Total: 206
+
+> @mui/material@6.0.2 build:copy-files {저장 경로}/material-ui/packages/mui-material
+> node ../../scripts/copyFiles.mjs
+
+Created package.json in {저장 경로}/material-ui/packages/mui-material/build/package.json
+Copied {저장 경로}/material-ui/packages/mui-material/README.md to {저장 경로}/material-ui/packages/mui-material/build/README.md
+Copied {저장 경로}/material-ui/LICENSE to {저장 경로}/material-ui/packages/mui-material/build/LICENSE
+Copied {저장 경로}/material-ui/CHANGELOG.md to {저장 경로}/material-ui/packages/mui-material/build/CHANGELOG.md
+
+———————————————————————————————————————————————————————————————————
+
+ Lerna (powered by Nx)   Successfully ran target build for project @mui/material and 8 tasks it depends on
+
+```
+
+##### build 전후 컴포넌트 파일 변화 (npx pnpm run build --scope=@mui/material)
+
+```
+// build 전 Accordion 폴더 (src/Accordion)
+- Accordion.d.ts
+- Accordion.js
+- Accordion.spec.tsx
+- Accordion.test.js
+- accordionClasses.ts
+- AccordionContext.js
+- index.d.ts
+- index.js
+```
+
+<br/>
+
+```
+// build 후 Accordion 폴더 (build/Accordion)
+- Accordion.d.ts (동일)
+- Accordion.js (transpile)
+- accordionClasses.d.ts 🧸 (AccordionClass 타입 정의)
+- accordionClasses.js 🧸 (accordionClasses.ts에서 타입 정의 제거한 순수 js코드만 있는 파일)
+- AccordionContext.js (동일)
+- index.d.ts (동일)
+- index.js (import 구문에서 .js 확장자 붙음)
+- package.json 🧸
+```
 
 <br/>
 <br/>
