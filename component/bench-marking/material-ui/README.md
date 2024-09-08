@@ -106,6 +106,87 @@ https://github.com/mui/material-ui/blob/master/scripts/buildTypes.mjs
 
 ### src
 
+#### 특징
+
+- 각 컴포넌트 폴더마다 아래의 파일 셋트를 가지고 있음
+
+```
+// src/Accordion
+- Accordion.d.ts
+- Accordion.js
+- Accordion.spec.tsx
+- Accordion.test.js
+- accordionClasses.ts
+- AccordionContext.js
+- index.d.ts
+- index.js
+
+// src/Alert
+- Alert.d.ts
+- Alert.js
+- Alert.spec.tsx
+- Alert.test.js
+- alertClasses.ts
+- index.d.ts
+- index.js
+```
+
+- `{컴포넌트명}.d.ts`: 컴포넌트의 props, state 등 실제 컴포넌트 구현, 사용에 필요한 타입을 정의한 파일
+- `{컴포넌트명}.js`: 컴포넌트 코드
+  - 컴포넌트는 React.forwardRef()로 생성한 실제 react 컴포넌트 코드
+  - 컴포넌트 코드 하위에 `{컴포넌트}.prototype` 코드는 `pnpm proptypes`를 실행하여 `{컴포넌트}.d.ts`에서 참조한 타입 값을 복붙함
+- `{컴포넌트명}.spec.tsx`: 컴포넌트를 .tsx에서 사용한 테스트 케이스로 보임
+- `{컴포넌트명}.test.js`: chai 테스트 코드
+- `{컴포넌트명}Classes.ts`: `{컴포넌트명}.js`에서 정의한
+- `index.d.ts`: 컴포넌트 타입 정의 파일과 (`{컴포넌트명}.d.ts`)와 클래스(`{컴포넌트명}Classes.ts`) 타입을 정의한/export한 파일 (module.d.ts-esmodule, commonjs 대응)
+- `index.js`: 컴포넌트를 export한 파일 (module.d.ts-esmodule, commonjs 대응)
+
+<br/>
+
+🔥 참고할 부분
+
+- ✎ 왜 타입들을 d.ts로 별도로 작성하면서 컴포넌트는 js로 개발했을까??  
+  (추측) material-ui 초기 개발 당시엔 typescript 사용이 미미하여, 또는 내부 이유로 js 로 개발하였지만 점차 ts 사용처들이 많아져 타입 정의 파일을 제공하게 된 게 아닐까?
+- ✎ build 파일에 컴포넌트 빌드 파일(js)과 타입 정의 파일(d.ts)를 제공해야 할 듯
+- ✎ 타입 정의 파일, index.js에서 esmodule, commonjs 둘다 사용할 수 있도록 타입과 컴포넌트 export 코드를 각각 작성함  
+  → type: module로 개발하면 d.ts(mts) 와 d.cts 로 제공해줘도 될 듯!
+
+```
+// index.js
+export { default } from './Accordion';
+
+export { default as accordionClasses } from './accordionClasses';
+export * from './accordionClasses';
+
+
+// index.d.ts
+export { default } from './Accordion';
+export * from './Accordion';
+
+export { default as accordionClasses } from './accordionClasses';
+export * from './accordionClasses';
+
+```
+
+<br/>
+
+- (궁금증)
+  - (1) index.js에서는 export Accordion.js 코드는 esm 으로만 작성하고, commonjs 로 작성하지 않았는가?
+  - (2) accordionClasses 는 정확한 역할이 무엇이길래 index.js/index.d.ts 에서 export 하고 있는가???
+  - (3) Accordion 컴포넌트를 사용하는 곳에서 확인했을 때 아래와 같은 구조를 가짐
+    -> index.js 에서 export 한 코드들은 어떻게 아래의 코드 형태가 되었는가?
+  ```
+  ==accordion==
+  {render: ƒ Accordion(), propTypes: Object}
+  ```
+  - Accordion은 child에 AccordionSummary, AccordionDetails 등 하위 컴포넌트들을 주입해서 사용할 수 있음. 어떻게 구현 가능한지 확인 필요함!!
+    https://codesandbox.io/s/quizzical-breeze-k7ksst?file=/src/Demo.tsx
+  - build의 각 컴포넌트별 폴더에 package.json이 위치함. root의 package.json과 컴포넌트 별 package.json이 함께 merge되는 것인지 확인 필요!!!
+    (그렇다면, material ui 처럼 컴포넌트가 많은 경우 root의 package.json에 export 구문을 나열하지 않아도 되므로 좋을듯?)
+
+<br/>
+<br/>
+
 #### export
 
 <br/>
