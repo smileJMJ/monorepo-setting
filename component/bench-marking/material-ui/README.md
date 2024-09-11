@@ -138,8 +138,8 @@ https://github.com/mui/material-ui/blob/master/scripts/buildTypes.mjs
 - `{컴포넌트명}.spec.tsx`: 컴포넌트를 .tsx에서 사용한 테스트 케이스로 보임
 - `{컴포넌트명}.test.js`: chai 테스트 코드
 - `{컴포넌트명}Classes.ts`: `{컴포넌트명}.js`에서 정의한
-- `index.d.ts`: 컴포넌트 타입 정의 파일과 (`{컴포넌트명}.d.ts`)와 클래스(`{컴포넌트명}Classes.ts`) 타입을 정의한/export한 파일 (module.d.ts-esmodule, commonjs 대응)
-- `index.js`: 컴포넌트를 export한 파일 (module.d.ts-esmodule, commonjs 대응)
+- `index.d.ts`: 컴포넌트 타입 정의 파일과 (`{컴포넌트명}.d.ts`)와 클래스(`{컴포넌트명}Classes.ts`) 타입을 정의한/export한 파일
+- `index.js`: 컴포넌트를 export한 파일
 
 <br/>
 
@@ -147,31 +147,12 @@ https://github.com/mui/material-ui/blob/master/scripts/buildTypes.mjs
 
 - ✎ 왜 타입들을 d.ts로 별도로 작성하면서 컴포넌트는 js로 개발했을까??  
   (추측) material-ui 초기 개발 당시엔 typescript 사용이 미미하여, 또는 내부 이유로 js 로 개발하였지만 점차 ts 사용처들이 많아져 타입 정의 파일을 제공하게 된 게 아닐까?
+  (추측2) 해당 git에는 tsc emit 한 파일만 올려둔 것인가..?! 는 아닌듯..!
 - ✎ build 파일에 컴포넌트 빌드 파일(js)과 타입 정의 파일(d.ts)를 제공해야 할 듯
-- ✎ 타입 정의 파일, index.js에서 esmodule, commonjs 둘다 사용할 수 있도록 타입과 컴포넌트 export 코드를 각각 작성함  
-  → type: module로 개발하면 d.ts(mts) 와 d.cts 로 제공해줘도 될 듯!
-
-```
-// index.js
-export { default } from './Accordion';
-
-export { default as accordionClasses } from './accordionClasses';
-export * from './accordionClasses';
-
-
-// index.d.ts
-export { default } from './Accordion';
-export * from './Accordion';
-
-export { default as accordionClasses } from './accordionClasses';
-export * from './accordionClasses';
-
-```
-
-<br/>
-
+- ✎ @mui/material은 commonjs이지만, esm으로 작업되어 있음(import, export)
+  → type: module로 개발하면 commonjs 대응은 .cjs, .cts 로 제공해줘도 될 듯!
 - (궁금증)
-  - (1) index.js에서는 export Accordion.js 코드는 esm 으로만 작성하고, commonjs 로 작성하지 않았는가?
+  - (1) @mui/material은 `commonjs(type: 'commonjs')` 인데, index.js에선 export 하는 `esm` 구조로 정의함??
   - (2) accordionClasses 는 정확한 역할이 무엇이길래 index.js/index.d.ts 에서 export 하고 있는가???
   - (3) Accordion 컴포넌트를 사용하는 곳에서 확인했을 때 아래와 같은 구조를 가짐
     -> index.js 에서 export 한 코드들은 어떻게 아래의 코드 형태가 되었는가?
