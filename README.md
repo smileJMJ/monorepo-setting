@@ -201,6 +201,38 @@ monorepo 셋팅 프로젝트 입니다.
     (relative path) `"foo": "workspace:../foo"` 처럼 사용함 <br/>
 
 <br/>
+<br/>
+
+##### pnpm으로 prettier 셋팅하기
+
+(1) root에 prettier@3.3.0 설치 후, 하위 패키지에서 prettier 설치 시
+
+```
+root: prettier@3.3.0 (symlink 연결)
+package/config-prettier: prettier@3.3.0 고정으로 설치됨 (symlink 연결)
+```
+
+<br/>
+
+(2) 하위 패키지에서 prettier@3.3.0 설치 후, root에 prettier 설치 시
+
+```
+root: prettier@3.3.0 (symlink 연결)
+package/config-prettier: prettier@3.3.0 고정으로 설치됨 (symlink 연결)
+```
+
+<br/>
+
+🔥 모노레포 워크스페이스의 어디에서든 prettier 설치하면 동일한 prettier를 바라보게 된다. <br/>
+🔥 모노레포 워크스페이스에 prettier를 한 번이라도 설치하면, `pnpm prettier` 를 실행할 수 있음 <br/>
+(ex) `pnpm prettier apps/test/src/js/App.tsx --write` (prettier config 확인 후 규칙에 맞게 수정해줌) <br/>
+🔥 prettier, eslint 와 같은 공통 라이브러리들은 하위 패키지별 사용하는 버전이 다를 수 있으므로, config-prettier, config-eslint 처럼 하위 패키지로 생성, 설치하여 사용하는 것이 좋을 듯!! <br/>
+📒 vscode 에서 prettier extension 설치되어 있으면, 워크스페이스에 prettier 없어도 실행 가능<br/>
+(prettier extension에서 로컬 prettier가 있으면 사용하고, 없으면 내부적으로 registry의 prettier를 사용함)<br/>
+(단 로컬에 prettier가 없으므로 `pnpm prettier` 구문은 실행 불가함)<br/>
+
+<br/>
+<br/>
 
 #### yarn berry
 
